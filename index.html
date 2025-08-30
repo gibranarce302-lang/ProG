@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>XboxApp</title>
+</head>
+<body>
+  <h1>XboxApp 🌐</h1>
+  <p id="bienvenida"></p>
+  <p id="monedas"></p>
+  <p id="racha"></p>
+
+  <h3>Amigos</h3>
+  <ul id="listaAmigos"></ul>
+  <input type="text" id="nuevoAmigo" placeholder="Agregar amigo">
+  <button onclick="agregarAmigo()">Agregar</button>
+
+  <h3>Chat</h3>
+  <div id="chat"></div>
+  <input type="text" id="msg" placeholder="Mensaje">
+  <button onclick="enviarMsg()">Enviar</button>
+
+  <h3>Juegos Configurados</h3>
+  <ul id="listaJuegos"></ul>
+
+  <script>
+    let usuario = localStorage.getItem("usuario");
+
+    document.getElementById("bienvenida").innerText = "Bienvenido " + usuario;
+
+    // Sistema de racha y monedas
+    let hoy = new Date().toDateString();
+    let ultima = localStorage.getItem("ultimaFecha") || "";
+    let monedas = parseInt(localStorage.getItem("monedas") || 0);
+    let racha = parseInt(localStorage.getItem("racha") || 0);
+
+    if(ultima !== hoy){
+      racha++;
+      monedas += 10;
+      localStorage.setItem("racha", racha);
+      localStorage.setItem("monedas", monedas);
+      localStorage.setItem("ultimaFecha", hoy);
+    }
+
+    document.getElementById("monedas").innerText = "Monedas: " + monedas;
+    document.getElementById("racha").innerText = "Racha de días: " + racha;
+
+    // Amigos
+    async function cargarAmigos(){
+      let res = await fetch("friends.json");
+      let amigos = await res.json();
+      let ul = document.getElementById("listaAmigos");
+      ul.innerHTML="";
+      amigos.filter(a=>a.usuario===usuario).forEach(a=>{
+        ul.innerHTML += `<li>${a.amigo}</li>`;
+      });
+    }
+    cargarAmigos();
+
+    function agregarAmigo(){
+      let nombre = document.getElementById("nuevoAmigo").value;
+      document.getElementById("listaAmigos").innerHTML += `<li>${nombre}</li>`;
+    }
+
+    // Chat básico en localStorage
+    function enviarMsg(){
+      let msg = document.getElementById("msg").value;
+      document.getElementById("chat").innerHTML += `<p><b>${usuario}:</b> ${msg}</p>`;
+      document.getElementById("msg").value="";
+    }
+  </script>
+</body>
+</html>
